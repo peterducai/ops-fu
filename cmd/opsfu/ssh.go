@@ -1,4 +1,4 @@
-package main
+package opsfu
 
 //forked from https://github.com/YuriyNasretdinov/GoSSHa/blob/master/main.go
 

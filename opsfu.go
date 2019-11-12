@@ -7,7 +7,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/peterducai/ops-fu"
+	"github.com/peterducai/ops-fu/cmd/opsfu"
 )
 
 func main() {

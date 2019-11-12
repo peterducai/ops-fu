@@ -1,0 +1,16 @@
+[aix1]
+aixnode6
+aixnode7
+
+
+[aix2]
+aixnode8 ansible_host=n8.example.com
+aixnode9
+
+[aixservers:children]
+aix1
+aix2
+
+[aixservers:vars]
+windows=no
+linux=no

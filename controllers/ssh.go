@@ -1,4 +1,4 @@
-package opsfu
+package controllers
 
 //forked from https://github.com/YuriyNasretdinov/GoSSHa/blob/master/main.go
 
@@ -97,6 +97,7 @@ type (
 		err      error
 	}
 
+	//ProxyRequest request
 	ProxyRequest struct {
 		Action        string
 		Password      string // password for private key (only for Action == "password")
@@ -108,6 +109,7 @@ type (
 		MaxThroughput uint64 // max throughput (for scp) in bytes per second, default is no limit
 	}
 
+	//Reply reply
 	Reply struct {
 		Hostname string
 		Stdout   string
@@ -116,36 +118,44 @@ type (
 		ErrMsg   string
 	}
 
+	//PasswordRequest password
 	PasswordRequest struct {
 		PasswordFor string
 	}
 
+	//FinalReply final reply
 	FinalReply struct {
 		TotalTime     float64
 		TimedOutHosts map[string]bool
 	}
 
+	//ConnectionProgress progress
 	ConnectionProgress struct {
 		ConnectedHost string
 	}
 
+	//UserError user error
 	UserError struct {
 		IsCritical bool
 		ErrorMsg   string
 	}
 
+	//InitializeComplete init complete
 	InitializeComplete struct {
 		InitializeComplete bool
 	}
 
 	// executionRequest is used to send requests to the execution pool.
 	executionRequest struct {
-		Func func(string) *SshResult
+		Func func(string) *SSHResult
 		Host string
 	}
 
+	//DisableReportConnectedHosts bool
 	DisableReportConnectedHosts bool
-	EnableReportConnectedHosts  bool
+
+	//EnableReportConnectedHosts bool
+	EnableReportConnectedHosts bool
 )
 
 func reportErrorToUser(msg string) {
@@ -549,16 +559,16 @@ func maxThroughputThread() {
 	}
 }
 
-func getExecFunc(msg *ProxyRequest) func(string) *SshResult {
+func getExecFunc(msg *ProxyRequest) func(string) *SSHResult {
 	if msg.Action == "ssh" {
 		if msg.Cmd == "" {
 			reportCriticalErrorToUser("Empty 'Cmd'")
 			return nil
 		}
 
-		return func(hostname string) *SshResult {
-			stdout, stderr, err := executeCmd(msg.Cmd, hostname)
-			return &SshResult{hostname: hostname, stdout: stdout, stderr: stderr, err: err}
+		return func(hostname string) *SSHResult {
+			stdout, stderr, err := ExecuteCmd(msg.Cmd, hostname)
+			return &SSHResult{hostname: hostname, stdout: stdout, stderr: stderr, err: err}
 		}
 	} else if msg.Action == "scp" {
 		if msg.Source == "" {
@@ -591,7 +601,7 @@ func getExecFunc(msg *ProxyRequest) func(string) *SshResult {
 			return nil
 		}
 
-		return func(hostname string) *SshResult {
+		return func(hostname string) *SSHResult {
 			stdout, stderr, err := uploadFile(msg.Target, contents, hostname)
 			return &SSHResult{hostname: hostname, stdout: stdout, stderr: stderr, err: err}
 		}
@@ -615,7 +625,7 @@ func runAction(msg *ProxyRequest) {
 
 	startTime := time.Now().UnixNano()
 
-	responseChannel := make(chan *SshResult, len(msg.Hosts))
+	responseChannel := make(chan *SSHResult, len(msg.Hosts))
 	timeoutChannel := time.After(time.Millisecond * time.Duration(timeout))
 
 	timedOutHosts := make(map[string]bool)
